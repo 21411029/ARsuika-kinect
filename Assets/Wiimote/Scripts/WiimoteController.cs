@@ -2,17 +2,13 @@
 using System.Collections;
 using WiimoteApi;
 
-////////////////////////////////
-/// Wii_Motion_Interface.cs	///
-///////////////////////////////
-public class Wii_Motion_Interface : MonoBehaviour {
-	private float	_rumble_time	= 0.15f;
+public class WiimoteController : MonoBehaviour {
 	private Wiimote _wiimote;
 	private Vector3 _accel 			= Vector3.zero;
 	private bool 	_now_rumble 	= false;
 	private bool	_wiimote_reset	= false;
-	private static Wii_Motion_Interface _instance;
-	public	static Wii_Motion_Interface Instance{
+	private static WiimoteController _instance;
+	public	static WiimoteController Instance{
 		get{
 			return _instance;
 		}
@@ -64,17 +60,17 @@ public class Wii_Motion_Interface : MonoBehaviour {
 	}
 
 	/// バイブレーション
-	public void SetRumble(){
-		StartCoroutine ("_Rumble");
+	public void SetRumble(float time = 0.15f){
+		StartCoroutine (_Rumble(time));
 	}
 
-	private IEnumerator _Rumble(){
+	private IEnumerator _Rumble(float time){
 		if (_now_rumble || _wiimote_reset) 
 			yield break;
 		_now_rumble = true;
 		_wiimote.RumbleOn = true;
 		_wiimote.SendStatusInfoRequest();
-		yield return new WaitForSeconds (_rumble_time);
+		yield return new WaitForSeconds (time);
 		_wiimote.RumbleOn = false;
 		_wiimote.SendStatusInfoRequest();
 		Reset ();
