@@ -51,16 +51,18 @@ public class HandDirection
         return result;
     }
 
-    public Vector3 getDirection()
+    public Vector3 getDirection(bool fromElbow = false)
     {
         Vector3 result;
-        if ((status | 0x03) != 0)
+        if( fromElbow)
+            result = handPos - elbowPos;
+        else if ((status & 0x03) == 0x03)
             result = tipPos - handPos;
-        else if ((status | 0x05) != 0)
+        else if ((status & 0x05) == 0x05)
             result = tipPos - wristPos;
-        else if ((status | 0x06) != 0)
+        else if ((status & 0x06) == 0x06)
             result = handPos - wristPos;
-        else if ((status | 0x0a) != 0)
+        else if ((status & 0x0a) == 0x0a)
             result = handPos - elbowPos;
         else
             result = lastDir;

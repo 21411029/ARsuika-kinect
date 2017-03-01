@@ -17,7 +17,7 @@ public class BodySourceView : MonoBehaviour
 
     static GameObject MainCamera;
 
-    private HandDirection HandDirectionR;
+    private StickDetector StickDetect;
 
     public GameObject Stick;
     
@@ -161,7 +161,7 @@ public class BodySourceView : MonoBehaviour
     
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
     {
-        HandDirectionR.reset();
+        StickDetect.reset(Time.deltaTime);
 
         for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
         {
@@ -179,7 +179,7 @@ public class BodySourceView : MonoBehaviour
             LineRenderer lr = jointObj.GetComponent<LineRenderer>();
             if(targetJoint.HasValue)
             {
-                HandDirectionR.setPos(jointObj.localPosition, jt);
+                StickDetect.setPos(jointObj.localPosition, jt);
 
                 lr.SetPosition(0, jointObj.localPosition);
                 lr.SetPosition(1, GetVector3FromJoint(targetJoint.Value));
@@ -191,8 +191,8 @@ public class BodySourceView : MonoBehaviour
             }
         }
 
-        Vector3 front = HandDirectionR.getDirection().normalized;
-        Vector3 pos = HandDirectionR.getPosition();
+        Vector3 front = StickDetect.getDirection().normalized;
+        Vector3 pos = StickDetect.getPosition();
 
         Stick.transform.LookAt( pos + front );
         //Stick.transform.Rotate( Stick.transform.right, 90);
@@ -226,7 +226,7 @@ public class BodySourceView : MonoBehaviour
     void Start()
     {
         MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        HandDirectionR = new HandDirection(true);
+        StickDetect = new StickDetector();
     }
 		
 }
