@@ -13,7 +13,7 @@ public class BodySourceView : MonoBehaviour
 
 	public GameObject RightHand;
 
-
+    static GameObject MainCamera;
     
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
@@ -126,7 +126,7 @@ public class BodySourceView : MonoBehaviour
             lr.material = BoneMaterial;
             lr.SetWidth(0.05f, 0.05f);
             
-            jointObj.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            jointObj.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
             jointObj.name = jt.ToString();
             jointObj.transform.parent = body.transform;
 
@@ -158,7 +158,7 @@ public class BodySourceView : MonoBehaviour
             {
 				if (jt == Kinect.JointType.HandRight) {
 					RightHand.transform.position = jointObj.localPosition;
-					Debug.Log ("RightHand" + jointObj.localPosition.ToString());
+//					Debug.Log ("RightHand" + jointObj.position.ToString());
 				}
 
                 lr.SetPosition(0, jointObj.localPosition);
@@ -190,9 +190,15 @@ public class BodySourceView : MonoBehaviour
     
     private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
     {
-        return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
+        Vector3 kinectPos = new Vector3(-joint.Position.X, joint.Position.Y, joint.Position.Z);
+        Vector3 globalPos = MainCamera.transform.TransformPoint(kinectPos);
 
+        return globalPos;
     }
 
+    void Start()
+    {
+        MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+    }
 		
 }
