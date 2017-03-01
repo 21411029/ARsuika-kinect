@@ -3,17 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using Kinect = Windows.Kinect;
 
+
+
 public class BodySourceView : MonoBehaviour 
 {
     public Material BoneMaterial;
+    public Material FocusMaterial;
+    public Material JointMaterial;
     public GameObject BodySourceManager;
     
     private Dictionary<ulong, GameObject> _Bodies = new Dictionary<ulong, GameObject>();
     private BodySourceManager _BodyManager;
 
-	public GameObject RightHand;
+    static GameObject MainCamera;
 
+    private StickDetector StickDetect;
 
+    public GameObject Stick;
     
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
@@ -46,7 +52,19 @@ public class BodySourceView : MonoBehaviour
         { Kinect.JointType.SpineShoulder, Kinect.JointType.Neck },
         { Kinect.JointType.Neck, Kinect.JointType.Head },
     };
-    
+
+    private Dictionary<Kinect.JointType, Kinect.JointType> _FocusJointMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
+    {
+        { Kinect.JointType.HandTipLeft, Kinect.JointType.HandLeft },
+        { Kinect.JointType.HandLeft, Kinect.JointType.WristLeft },
+        { Kinect.JointType.WristLeft, Kinect.JointType.ElbowLeft },
+
+        { Kinect.JointType.HandTipRight, Kinect.JointType.HandRight },
+        { Kinect.JointType.HandRight, Kinect.JointType.WristRight },
+        { Kinect.JointType.WristRight, Kinect.JointType.ElbowRight },
+    };
+
+
     void Update () 
     {
         if (BodySourceManager == null)
@@ -124,13 +142,16 @@ public class BodySourceView : MonoBehaviour
             LineRenderer lr = jointObj.AddComponent<LineRenderer>();
             lr.SetVertexCount(2);
             lr.material = BoneMaterial;
+
             lr.SetWidth(0.05f, 0.05f);
             
-            jointObj.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            jointObj.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
             jointObj.name = jt.ToString();
             jointObj.transform.parent = body.transform;
-
-
+            if (_FocusJointMap.ContainsKey(jt))
+                jointObj.GetComponent<MeshRenderer>().material = FocusMaterial;
+            else
+                jointObj.GetComponent<MeshRenderer>().material = JointMaterial;
         }
         
         return body;
@@ -140,6 +161,8 @@ public class BodySourceView : MonoBehaviour
     
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
     {
+        StickDetect.reset(Time.deltaTime);
+
         for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
         {
             Kinect.Joint sourceJoint = body.Joints[jt];
@@ -156,10 +179,7 @@ public class BodySourceView : MonoBehaviour
             LineRenderer lr = jointObj.GetComponent<LineRenderer>();
             if(targetJoint.HasValue)
             {
-				if (jt == Kinect.JointType.HandRight) {
-					RightHand.transform.position = jointObj.localPosition;
-					Debug.Log ("RightHand" + jointObj.localPosition.ToString());
-				}
+                StickDetect.setPos(jointObj.localPosition, jt);
 
                 lr.SetPosition(0, jointObj.localPosition);
                 lr.SetPosition(1, GetVector3FromJoint(targetJoint.Value));
@@ -171,8 +191,15 @@ public class BodySourceView : MonoBehaviour
             }
         }
 
+        Vector3 front = StickDetect.getDirection().normalized;
+        Vector3 pos = StickDetect.getPosition();
+
+        Stick.transform.LookAt( pos + front );
+        //Stick.transform.Rotate( Stick.transform.right, 90);
+        Stick.transform.position = pos + front * 0.5f;
+
     }
-    
+
     private static Color GetColorForState(Kinect.TrackingState state)
     {
         switch (state)
@@ -190,9 +217,16 @@ public class BodySourceView : MonoBehaviour
     
     private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
     {
-        return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
+        Vector3 kinectPos = new Vector3(-joint.Position.X, joint.Position.Y, joint.Position.Z);
+        Vector3 globalPos = MainCamera.transform.TransformPoint(kinectPos);
 
+        return globalPos;
     }
 
+    void Start()
+    {
+        MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        StickDetect = new StickDetector();
+    }
 		
 }
