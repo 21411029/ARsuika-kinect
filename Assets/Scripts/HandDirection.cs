@@ -11,6 +11,8 @@ public class HandDirection
     Vector3 lastDir;
     Vector3 currentDir;
 
+    float movement;
+
     bool isRight;
 
     public HandDirection()
@@ -20,6 +22,7 @@ public class HandDirection
         lastPos = Vector3.zero;
         lastDir = Vector3.forward;
         currentDir = Vector3.zero;
+        movement = 0;
     }
     public HandDirection(bool isForRight)
     {
@@ -28,6 +31,7 @@ public class HandDirection
         lastPos = Vector3.zero;
         lastDir = Vector3.forward;
         currentDir = Vector3.zero;
+        movement = 0;
     }
 
     public void reset()
@@ -73,6 +77,10 @@ public class HandDirection
         return result;
     }
 
+    public float getMovement()
+    {
+        return movement;
+    }
 
     public void setPos(Vector3 pos, Kinect.JointType joint)
     {
@@ -86,6 +94,7 @@ public class HandDirection
                     break;
                 case Kinect.JointType.HandRight:
                     handPos = pos;
+                    movement = movement * 0.98f + Vector3.Distance(pos, lastPos);
                     status |= 2;
                     break;
                 case Kinect.JointType.WristRight:
@@ -109,6 +118,7 @@ public class HandDirection
                 case Kinect.JointType.HandLeft:
                     handPos = pos;
                     status |= 2;
+                    movement = movement * 0.98f + Vector3.Distance(pos, lastPos);
                     break;
                 case Kinect.JointType.WristLeft:
                     wristPos = pos;
