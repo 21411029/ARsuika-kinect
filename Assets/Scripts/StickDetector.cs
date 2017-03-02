@@ -18,6 +18,12 @@ public class StickDetector {
         isRightHanded = true;
     }
 
+    public void Update()
+    {
+        leftHand.Update();
+        rightHand.Update();
+    }
+
     public void reset(float deltaTime)
     {
         leftHand.reset();

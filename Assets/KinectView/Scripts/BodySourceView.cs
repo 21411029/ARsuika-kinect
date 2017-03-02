@@ -195,6 +195,8 @@ public class BodySourceView : MonoBehaviour
             }
         }
 
+        StickDetect.Update();
+
         // displace Stick
         Vector3 front = StickDetect.getDirection().normalized;
         Vector3 pos = StickDetect.getPosition();
@@ -203,13 +205,12 @@ public class BodySourceView : MonoBehaviour
         //Stick.transform.Rotate( Stick.transform.right, 90);
         Stick.transform.position = pos + front * 0.5f;
 
-        if (StickDetect.isSwinging())
+        AudioSource stickAudio = Stick.GetComponent<AudioSource>();
+        if (StickDetect.isSwinging() && !stickAudio.isPlaying )
         {
-            AudioSource stickAudio = Stick.GetComponent<AudioSource>();
             stickAudio.clip = ClipSwingHeavy;
             stickAudio.time = 0.12f;
             stickAudio.Play();
-            Debug.Log("Swing!");
         }
     }
 
@@ -240,6 +241,11 @@ public class BodySourceView : MonoBehaviour
     {
         MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         StickDetect = new StickDetector();
+    }
+
+    public bool isSwinging()
+    {
+        return StickDetect.isSwinging();
     }
 		
 }
