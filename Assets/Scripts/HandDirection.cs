@@ -12,6 +12,7 @@ public class HandDirection
     Vector3 currentDir;
 
     float movement;
+    public bool isSwinging;
 
     bool isRight;
 
@@ -37,6 +38,7 @@ public class HandDirection
     public void reset()
     {
         status = 0;
+        isSwinging = false;
     }
 
     public Vector3 getPosition()
@@ -50,6 +52,13 @@ public class HandDirection
             result = wristPos;
         else
             result = lastPos;
+
+        Vector3 move = result - lastPos;
+        movement = movement * 0.96f + move.magnitude;
+        if (move.magnitude > 0.1f && Vector3.Dot(move.normalized, Vector3.down) > 0.8f)
+        {
+            isSwinging = true;
+        }
 
         lastPos = result;
         return result;
@@ -94,7 +103,6 @@ public class HandDirection
                     break;
                 case Kinect.JointType.HandRight:
                     handPos = pos;
-                    movement = movement * 0.98f + Vector3.Distance(pos, lastPos);
                     status |= 2;
                     break;
                 case Kinect.JointType.WristRight:
@@ -118,7 +126,6 @@ public class HandDirection
                 case Kinect.JointType.HandLeft:
                     handPos = pos;
                     status |= 2;
-                    movement = movement * 0.98f + Vector3.Distance(pos, lastPos);
                     break;
                 case Kinect.JointType.WristLeft:
                     wristPos = pos;

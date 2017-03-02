@@ -41,6 +41,11 @@ public class StickDetector {
         rightHand.setPos(pos, joint);
     }
 
+    public bool isSwinging()
+    {
+        return getWieldingHand().isSwinging;
+    }
+
     public Vector3 getPosition()
     {
         Vector3 result;
@@ -69,12 +74,22 @@ public class StickDetector {
         float dist;
 
         dist = Vector3.SqrMagnitude(leftHand.getPosition() - rightHand.getPosition());
-        return (dist < 0.2f * 0.2f);
+        return (dist < 0.2f * 0.2f);    // double-handed = less than 20cm
     }
 
     private HandDirection getWieldingHand()
     {
-        isRightHanded = (rightHand.getMovement() > leftHand.getMovement());
+        float moveR = rightHand.getMovement();
+        float moveL = leftHand.getMovement();
+        float threshold = 1.0f;                 // hysteresis factor for changing hands 
+
+        if ( !(moveR < 0.5f && moveL < 0.5f) )  // Do not change the hand when standing still
+        {
+            if (isRightHanded)
+                isRightHanded = (moveR * threshold > moveL);
+            else // if leftHanded
+                isRightHanded = (moveR > moveL * threshold);
+        }
         if (isRightHanded)
             return rightHand;
         else

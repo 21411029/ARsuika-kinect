@@ -9,7 +9,7 @@ public class GameLoop : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        mainCamera.transform.LookAt(new Vector3(0,1,0));
+        mainCamera.transform.LookAt(new Vector3(0,0,0));
 
         targetScreen = GameObject.FindGameObjectWithTag("TargetScreen");
         targetScreen.transform.localPosition = new Vector3(0,0,20);
