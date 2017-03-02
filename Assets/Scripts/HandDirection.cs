@@ -8,6 +8,8 @@ public class HandDirection
     int status = 0;
 
     Vector3 lastPos;
+    Vector3 position;
+
     Vector3 lastDir;
     Vector3 currentDir;
 
@@ -15,6 +17,41 @@ public class HandDirection
     public bool isSwinging;
 
     bool isRight;
+
+    public void Update()
+    {
+
+
+        if ((status | 0x02) != 0)
+            position = handPos;
+        else if ((status | 0x01) != 0)
+            position = tipPos;
+        else if ((status | 0x04) != 0)
+            position = wristPos;
+        else
+            position = lastPos;
+
+        Vector3 move = position - lastPos;
+        movement = movement * 0.96f + move.magnitude;
+
+        float threshold;
+        if (isSwinging)
+            threshold = 0.02f;
+        else
+            threshold = 0.05f;
+
+        Debug.Log(Vector3.Dot(move, Vector3.down));
+
+        if (move.magnitude > threshold && Vector3.Dot(move.normalized, Vector3.down) > 0.5f)
+            isSwinging = true;
+        else
+            isSwinging = false;
+
+        Debug.Log(isSwinging);
+
+        lastPos = position;
+    }
+
 
     public HandDirection()
     {
@@ -38,31 +75,14 @@ public class HandDirection
     public void reset()
     {
         status = 0;
-        isSwinging = false;
+        // isSwinging = false;
     }
 
     public Vector3 getPosition()
     {
-        Vector3 result;
-        if ((status | 0x02) != 0)
-            result = handPos;
-        else if ((status | 0x01) != 0)
-            result = tipPos;
-        else if ((status | 0x04) != 0)
-            result = wristPos;
-        else
-            result = lastPos;
-
-        Vector3 move = result - lastPos;
-        movement = movement * 0.96f + move.magnitude;
-        if (move.magnitude > 0.1f && Vector3.Dot(move.normalized, Vector3.down) > 0.8f)
-        {
-            isSwinging = true;
-        }
-
-        lastPos = result;
-        return result;
+        return position;
     }
+
 
     public Vector3 getDirection(bool fromElbow = false)
     {
