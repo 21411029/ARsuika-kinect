@@ -7,6 +7,7 @@ public class StickDetector {
 
     private float doubleHandTimer;
     private bool isDoubleHanded;
+    private bool isRightHanded;
 
     public StickDetector()
     {
@@ -14,6 +15,7 @@ public class StickDetector {
         rightHand = new HandDirection(true);
         doubleHandTimer = 0;
         isDoubleHanded = false;
+        isRightHanded = true;
     }
 
     public void reset(float deltaTime)
@@ -45,8 +47,7 @@ public class StickDetector {
         if (isDoubleHanded)
             result = (leftHand.getPosition() + rightHand.getPosition()) / 2.0f;
         else
-            result = rightHand.getPosition();
-
+            result = getWieldingHand().getPosition();
         return result;
     }
 
@@ -58,7 +59,7 @@ public class StickDetector {
             result = (leftHand.getDirection(true) + rightHand.getDirection(true));
 
         else
-            result = rightHand.getDirection();
+            result = getWieldingHand().getDirection();
         
         return result;
     }
@@ -71,5 +72,12 @@ public class StickDetector {
         return (dist < 0.2f * 0.2f);
     }
 
-
+    private HandDirection getWieldingHand()
+    {
+        isRightHanded = (rightHand.getMovement() > leftHand.getMovement());
+        if (isRightHanded)
+            return rightHand;
+        else
+            return leftHand;
+    }
 }
