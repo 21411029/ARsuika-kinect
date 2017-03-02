@@ -20,7 +20,11 @@ public class BodySourceView : MonoBehaviour
     private StickDetector StickDetect;
 
     public GameObject Stick;
-    
+    public AudioClip ClipSwingHeavy;
+    public AudioClip ClipSwingMedium;
+    public AudioClip ClipSwingLight;
+
+
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
         { Kinect.JointType.FootLeft, Kinect.JointType.AnkleLeft },
@@ -191,6 +195,7 @@ public class BodySourceView : MonoBehaviour
             }
         }
 
+        // displace Stick
         Vector3 front = StickDetect.getDirection().normalized;
         Vector3 pos = StickDetect.getPosition();
 
@@ -198,6 +203,14 @@ public class BodySourceView : MonoBehaviour
         //Stick.transform.Rotate( Stick.transform.right, 90);
         Stick.transform.position = pos + front * 0.5f;
 
+        if (StickDetect.isSwinging())
+        {
+            AudioSource stickAudio = Stick.GetComponent<AudioSource>();
+            stickAudio.clip = ClipSwingHeavy;
+            stickAudio.time = 0.12f;
+            stickAudio.Play();
+            Debug.Log("Swing!");
+        }
     }
 
     private static Color GetColorForState(Kinect.TrackingState state)
