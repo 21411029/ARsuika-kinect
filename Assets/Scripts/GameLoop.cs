@@ -9,7 +9,7 @@ public class GameLoop : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        mainCamera.transform.LookAt(new Vector3(0,1,0));
+        mainCamera.transform.LookAt(new Vector3(0,0,0));
 
         targetScreen = GameObject.FindGameObjectWithTag("TargetScreen");
         targetScreen.transform.localPosition = new Vector3(0,0,20);
@@ -20,7 +20,15 @@ public class GameLoop : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (Input.GetKeyDown(KeyCode.F))
+            Screen.fullScreen = !Screen.fullScreen;
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Application.Quit();
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            GameObject kinectManager = GameObject.FindGameObjectWithTag("KinectManagers");
+            kinectManager.GetComponent<BodySourceView>().Visible = !kinectManager.GetComponent<BodySourceView>().Visible;
+        }
 
-	
-	}
+    }
 }

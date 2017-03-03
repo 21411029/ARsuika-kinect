@@ -11,7 +11,9 @@ public class BodySourceView : MonoBehaviour
     public Material FocusMaterial;
     public Material JointMaterial;
     public GameObject BodySourceManager;
-    
+
+    public bool Visible = true;
+
     private Dictionary<ulong, GameObject> _Bodies = new Dictionary<ulong, GameObject>();
     private BodySourceManager _BodyManager;
 
@@ -20,7 +22,11 @@ public class BodySourceView : MonoBehaviour
     private StickDetector StickDetect;
 
     public GameObject Stick;
-    
+    public AudioClip ClipSwingHeavy;
+    public AudioClip ClipSwingMedium;
+    public AudioClip ClipSwingLight;
+
+
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
         { Kinect.JointType.FootLeft, Kinect.JointType.AnkleLeft },
@@ -123,12 +129,10 @@ public class BodySourceView : MonoBehaviour
                 {
                     _Bodies[body.TrackingId] = CreateBodyObject(body.TrackingId);
                 }
-                
+                _Bodies[body.TrackingId].SetActive(Visible);
                 RefreshBodyObject(body, _Bodies[body.TrackingId]);
             }
         }
-
-
     }
     
     private GameObject CreateBodyObject(ulong id)
@@ -153,10 +157,8 @@ public class BodySourceView : MonoBehaviour
             else
                 jointObj.GetComponent<MeshRenderer>().material = JointMaterial;
         }
-        
+
         return body;
-
-
     }
     
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
@@ -191,13 +193,22 @@ public class BodySourceView : MonoBehaviour
             }
         }
 
+        StickDetect.Update(Time.deltaTime);
+
+        // displace Stick
         Vector3 front = StickDetect.getDirection().normalized;
         Vector3 pos = StickDetect.getPosition();
 
         Stick.transform.LookAt( pos + front );
-        //Stick.transform.Rotate( Stick.transform.right, 90);
-        Stick.transform.position = pos + front * 0.5f;
+        Stick.transform.position = pos + front * (Stick.transform.localScale.z / 2.0f - 0.05f) ;
 
+        AudioSource stickAudio = Stick.GetComponent<AudioSource>();
+        if (StickDetect.isSwinging() && !stickAudio.isPlaying )
+        {
+            stickAudio.clip = ClipSwingLight;
+            stickAudio.time = 0.12f;
+            stickAudio.Play();
+        }
     }
 
     private static Color GetColorForState(Kinect.TrackingState state)
@@ -227,6 +238,11 @@ public class BodySourceView : MonoBehaviour
     {
         MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         StickDetect = new StickDetector();
+    }
+
+    public bool isSwinging()
+    {
+        return StickDetect.isSwinging();
     }
 		
 }
