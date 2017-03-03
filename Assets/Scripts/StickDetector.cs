@@ -20,8 +20,8 @@ public class StickDetector {
 
     public void Update()
     {
-        leftHand.Update();
-        rightHand.Update();
+        leftHand.Update(isDoubleHanded);
+        rightHand.Update(isDoubleHanded);
     }
 
     public void reset(float deltaTime)
@@ -67,8 +67,15 @@ public class StickDetector {
         Vector3 result;
 
         if (isDoubleHanded)
-            result = (leftHand.getDirection(true) + rightHand.getDirection(true));
+        {
+            Vector3 doubleHandDirFromElbow = leftHand.getDirection() + rightHand.getDirection();
+            Vector3 doubleHandDirFromHandDiff = rightHand.getPosition() - leftHand.getPosition();
+            float handDist = Vector3.Distance(leftHand.getPosition(), rightHand.getPosition());
+            handDist = handDist > 0.15f ? 0.15f : (handDist < 0 ? 0 : handDist);
 
+            // result = Vector3.Lerp(doubleHandDirFromElbow, doubleHandDirFromHandDiff, handDist / 0.15f);
+            result = doubleHandDirFromElbow;
+        }
         else
             result = getWieldingHand().getDirection();
         
@@ -80,7 +87,7 @@ public class StickDetector {
         float dist;
 
         dist = Vector3.SqrMagnitude(leftHand.getPosition() - rightHand.getPosition());
-        return (dist < 0.2f * 0.2f);    // double-handed = less than 20cm
+        return (dist < 0.3f * 0.3f);    // double-handed = less than 20cm
     }
 
     private HandDirection getWieldingHand()
