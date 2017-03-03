@@ -18,10 +18,9 @@ public class HandDirection
 
     bool isRight;
 
-    public void Update()
+    public void Update(bool isDoubleHanded)
     {
-
-
+        // Position
         if ((status | 0x02) != 0)
             position = handPos;
         else if ((status | 0x01) != 0)
@@ -35,21 +34,38 @@ public class HandDirection
         movement = movement * 0.96f + move.magnitude;
 
         float threshold;
-        if (isSwinging)
-            threshold = 0.02f;
-        else
-            threshold = 0.05f;
+        bool wasSwinging = isSwinging;
+        if (move.magnitude > 0)
+        {
+            if (isSwinging)
+                isSwinging = (move.magnitude > 0.01f);
+            else
+                isSwinging = (move.magnitude > 0.07f && Vector3.Dot(move.normalized, Vector3.down) > 0.5f);
 
-        Debug.Log(Vector3.Dot(move, Vector3.down));
-
-        if (move.magnitude > threshold && Vector3.Dot(move.normalized, Vector3.down) > 0.5f)
-            isSwinging = true;
-        else
-            isSwinging = false;
-
-        Debug.Log(isSwinging);
+            if (wasSwinging && !isSwinging)
+                Debug.Log("stop swing: " + move.magnitude + " : " + Vector3.Dot(move.normalized, Vector3.down));
+        }
 
         lastPos = position;
+
+        // Direction
+        Vector3 tempDir;
+        if (isDoubleHanded)
+            tempDir = handPos - elbowPos;
+        else if ((status & 0x03) == 0x03)
+            tempDir = tipPos - handPos;
+        else if ((status & 0x05) == 0x05)
+            tempDir = tipPos - wristPos;
+        else if ((status & 0x06) == 0x06)
+            tempDir = handPos - wristPos;
+//        else if ((status & 0x0a) == 0x0a)
+//            tempDir = handPos - elbowPos;
+        else
+            tempDir = lastDir;
+
+        lastDir = currentDir;
+        tempDir = tempDir * 0.15f + currentDir * 0.85f;
+        currentDir = tempDir;
     }
 
 
@@ -84,26 +100,9 @@ public class HandDirection
     }
 
 
-    public Vector3 getDirection(bool fromElbow = false)
+    public Vector3 getDirection()
     {
-        Vector3 result;
-        if( fromElbow)
-            result = handPos - elbowPos;
-        else if ((status & 0x03) == 0x03)
-            result = tipPos - handPos;
-        else if ((status & 0x05) == 0x05)
-            result = tipPos - wristPos;
-        else if ((status & 0x06) == 0x06)
-            result = handPos - wristPos;
-        else if ((status & 0x0a) == 0x0a)
-            result = handPos - elbowPos;
-        else
-            result = lastDir;
-
-        lastDir = result;
-        result = result * 0.2f + currentDir * 0.8f;
-        currentDir = result;
-        return result;
+        return currentDir;
     }
 
     public float getMovement()

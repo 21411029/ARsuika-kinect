@@ -14,16 +14,15 @@ public class SuikaMain : MonoBehaviour {
 	
 	}
 
-    void OnCollisionEnter(Collision col)
+    void OnTriggerEnter(Collider col)
     {
-        Debug.Log("Hit");
-        if (col.gameObject.tag == "Stick")
+        if( col.tag == "Stick")
         {
             BodySourceView body = GameObject.FindGameObjectWithTag("KinectManagers").GetComponent<BodySourceView>();
-            Debug.Log(body.isSwinging());
+            Debug.Log("Hit and Swing=" + body.isSwinging());
             if (body.isSwinging())
             {
-                this.transform.position = new Vector3(Random.Range(1.0f, 1.5f), 3.0f, -Random.Range(1.0f, 1.5f));
+                this.transform.position = new Vector3(Random.Range(1.5f, 2.0f), 3.0f, -Random.Range(1.5f, 2.0f));
             }
         }
     }

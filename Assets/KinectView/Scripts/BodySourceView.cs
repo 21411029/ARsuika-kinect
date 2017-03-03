@@ -11,7 +11,9 @@ public class BodySourceView : MonoBehaviour
     public Material FocusMaterial;
     public Material JointMaterial;
     public GameObject BodySourceManager;
-    
+
+    public bool Visible = true;
+
     private Dictionary<ulong, GameObject> _Bodies = new Dictionary<ulong, GameObject>();
     private BodySourceManager _BodyManager;
 
@@ -127,12 +129,10 @@ public class BodySourceView : MonoBehaviour
                 {
                     _Bodies[body.TrackingId] = CreateBodyObject(body.TrackingId);
                 }
-                
+                _Bodies[body.TrackingId].SetActive(Visible);
                 RefreshBodyObject(body, _Bodies[body.TrackingId]);
             }
         }
-
-
     }
     
     private GameObject CreateBodyObject(ulong id)
@@ -157,10 +157,8 @@ public class BodySourceView : MonoBehaviour
             else
                 jointObj.GetComponent<MeshRenderer>().material = JointMaterial;
         }
-        
+
         return body;
-
-
     }
     
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
@@ -202,13 +200,12 @@ public class BodySourceView : MonoBehaviour
         Vector3 pos = StickDetect.getPosition();
 
         Stick.transform.LookAt( pos + front );
-        //Stick.transform.Rotate( Stick.transform.right, 90);
-        Stick.transform.position = pos + front * 0.5f;
+        Stick.transform.position = pos + front * Stick.transform.localScale.z / 2.0f ;
 
         AudioSource stickAudio = Stick.GetComponent<AudioSource>();
         if (StickDetect.isSwinging() && !stickAudio.isPlaying )
         {
-            stickAudio.clip = ClipSwingHeavy;
+            stickAudio.clip = ClipSwingLight;
             stickAudio.time = 0.12f;
             stickAudio.Play();
         }
