@@ -20,7 +20,14 @@ public class GameLoop : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
-	
-	}
+        if (Input.GetKeyDown(KeyCode.F))
+            Screen.fullScreen = !Screen.fullScreen;
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Application.Quit();
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            GameObject kinectManager = GameObject.FindGameObjectWithTag("KinectManagers");
+            kinectManager.GetComponent<BodySourceView>().Visible = !kinectManager.GetComponent<BodySourceView>().Visible;
+        }
+    }
 }

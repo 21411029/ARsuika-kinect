@@ -200,7 +200,7 @@ public class BodySourceView : MonoBehaviour
         Vector3 pos = StickDetect.getPosition();
 
         Stick.transform.LookAt( pos + front );
-        Stick.transform.position = pos + front * Stick.transform.localScale.z / 2.0f ;
+        Stick.transform.position = pos + front * (Stick.transform.localScale.z / 2.0f - 0.05f) ;
 
         AudioSource stickAudio = Stick.GetComponent<AudioSource>();
         if (StickDetect.isSwinging() && !stickAudio.isPlaying )

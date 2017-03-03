@@ -4,11 +4,11 @@ using Kinect = Windows.Kinect;
 
 public class StickDetector {
     // CONSTANTS
-    float DOUBLEHANDTIMER = 0.5f;
-    float DOUBLEHANDKENDOSTYLE = 0.15f;
-    float DOUBLEHANDDISTANCE2 = 0.4f * 0.4f;
-    float HANDSWITCHBARRIER = 1.3f;
-    float HANDSWITCHMOVEMENT = 0.3f;
+    float DOUBLEHANDTIMER = 0.5f;           // duration to keep twohanded to enter DoubleHanded state
+    float DOUBLEHANDKENDOSTYLE = 0.2f;     // min distance to enter KENDO style
+    float DOUBLEHANDDISTANCE2 = 0.4f * 0.4f;    // sqr distance to recognize DoubleHanded
+    float HANDSWITCHBARRIER = 1.5f;         // Barrier factor to prevent switching left / right
+    float HANDSWITCHMOVEMENT = 0.3f;        // min movement to switch left / right
 
     HandDirection leftHand, rightHand;
 
