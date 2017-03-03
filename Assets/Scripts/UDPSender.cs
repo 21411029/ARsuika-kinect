@@ -164,4 +164,9 @@ public class UDPSender : MonoBehaviour
 
     }
 
+    void OnApplicationQuit()
+    {
+        client.Close();
+    }
+
 }
