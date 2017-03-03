@@ -29,5 +29,6 @@ public class GameLoop : MonoBehaviour {
             GameObject kinectManager = GameObject.FindGameObjectWithTag("KinectManagers");
             kinectManager.GetComponent<BodySourceView>().Visible = !kinectManager.GetComponent<BodySourceView>().Visible;
         }
+
     }
 }
