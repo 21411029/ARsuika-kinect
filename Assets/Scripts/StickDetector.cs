@@ -3,6 +3,13 @@ using System.Collections;
 using Kinect = Windows.Kinect;
 
 public class StickDetector {
+    // CONSTANTS
+    float DOUBLEHANDTIMER = 0.5f;
+    float DOUBLEHANDKENDOSTYLE = 0.15f;
+    float DOUBLEHANDDISTANCE2 = 0.4f * 0.4f;
+    float HANDSWITCHBARRIER = 1.3f;
+    float HANDSWITCHMOVEMENT = 0.3f;
+
     HandDirection leftHand, rightHand;
 
     private float doubleHandTimer;
@@ -31,7 +38,7 @@ public class StickDetector {
         if (closeHands())
         {
             doubleHandTimer += deltaTime;
-            if (doubleHandTimer > 0.5f)
+            if (doubleHandTimer > DOUBLEHANDTIMER)
                 isDoubleHanded = true;
         }
         else
@@ -71,10 +78,10 @@ public class StickDetector {
             Vector3 doubleHandDirFromElbow = leftHand.getDirection() + rightHand.getDirection();
             Vector3 doubleHandDirFromHandDiff = rightHand.getPosition() - leftHand.getPosition();
             float handDist = Vector3.Distance(leftHand.getPosition(), rightHand.getPosition());
-            handDist = handDist > 0.15f ? 0.15f : (handDist < 0 ? 0 : handDist);
+            handDist = handDist > DOUBLEHANDKENDOSTYLE ? DOUBLEHANDKENDOSTYLE : (handDist < 0 ? 0 : handDist);
 
-            // result = Vector3.Lerp(doubleHandDirFromElbow, doubleHandDirFromHandDiff, handDist / 0.15f);
-            result = doubleHandDirFromElbow;
+            result = Vector3.Lerp(doubleHandDirFromElbow, doubleHandDirFromHandDiff, handDist / DOUBLEHANDKENDOSTYLE);
+            // result = doubleHandDirFromElbow;
         }
         else
             result = getWieldingHand().getDirection();
@@ -87,16 +94,16 @@ public class StickDetector {
         float dist;
 
         dist = Vector3.SqrMagnitude(leftHand.getPosition() - rightHand.getPosition());
-        return (dist < 0.3f * 0.3f);    // double-handed = less than 20cm
+        return (dist < DOUBLEHANDDISTANCE2);    // double-handed = less than 20cm
     }
 
     private HandDirection getWieldingHand()
     {
         float moveR = rightHand.getMovement();
         float moveL = leftHand.getMovement();
-        float threshold = 1.2f;                 // hysteresis factor for changing hands 
+        float threshold = HANDSWITCHBARRIER;                 // hysteresis factor for changing hands 
 
-        if ( !(moveR < 0.3f && moveL < 0.3f) )  // Do not change the hand when standing still
+        if ( !(moveR < HANDSWITCHMOVEMENT && moveL < HANDSWITCHMOVEMENT) )  // Do not change the hand when standing still
         {
             if (isRightHanded)
                 isRightHanded = (moveR * threshold > moveL);
