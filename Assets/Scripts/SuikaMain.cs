@@ -3,6 +3,7 @@ using System.Collections;
 
 public class SuikaMain : MonoBehaviour {
 
+    public AudioClip audioHit;
 
 	// Use this for initialization
 	void Start () {
@@ -22,8 +23,14 @@ public class SuikaMain : MonoBehaviour {
             Debug.Log("Hit and Swing=" + body.isSwinging());
             if (body.isSwinging())
             {
+                AudioSource stickAudio = col.GetComponent<AudioSource>();
+                stickAudio.clip = audioHit;
+                stickAudio.time = 0.12f;
+                stickAudio.Play();
                 this.transform.position = new Vector3(Random.Range(1.5f, 2.0f), 3.0f, -Random.Range(1.5f, 2.0f));
             }
+
         }
     }
+
 }

@@ -193,7 +193,7 @@ public class BodySourceView : MonoBehaviour
             }
         }
 
-        StickDetect.Update();
+        StickDetect.Update(Time.deltaTime);
 
         // displace Stick
         Vector3 front = StickDetect.getDirection().normalized;

@@ -18,10 +18,10 @@ public class StickDetector {
         isRightHanded = true;
     }
 
-    public void Update()
+    public void Update(float ElapsedTime)
     {
-        leftHand.Update(isDoubleHanded);
-        rightHand.Update(isDoubleHanded);
+        leftHand.Update(isDoubleHanded, ElapsedTime);
+        rightHand.Update(isDoubleHanded, ElapsedTime);
     }
 
     public void reset(float deltaTime)
@@ -94,16 +94,16 @@ public class StickDetector {
     {
         float moveR = rightHand.getMovement();
         float moveL = leftHand.getMovement();
-        float threshold = 1.0f;                 // hysteresis factor for changing hands 
+        float threshold = 1.2f;                 // hysteresis factor for changing hands 
 
-        if ( !(moveR < 0.5f && moveL < 0.5f) )  // Do not change the hand when standing still
+        if ( !(moveR < 0.3f && moveL < 0.3f) )  // Do not change the hand when standing still
         {
             if (isRightHanded)
                 isRightHanded = (moveR * threshold > moveL);
             else // if leftHanded
                 isRightHanded = (moveR > moveL * threshold);
         }
-        if (isRightHanded)
+        if (isRightHanded || isDoubleHanded)
             return rightHand;
         else
             return leftHand;

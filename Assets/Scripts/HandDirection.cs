@@ -4,6 +4,14 @@ using Kinect = Windows.Kinect;
 
 public class HandDirection
 {
+    // Constants
+    float MOVEMENTDECAY = 0.96f;    // ratio of decaying movement accumulation. bigger = longer accumulation
+    float DIRECTIONDECAY = 0.8f;    // ratio of smoothing direction. bigger = slow and smooth
+    float SWINGKEEPSPEED = 0.04f;   // the speed to keep the swing state
+    float SWINGSTARTSPEED = 0.1f;   // the speed to enter the swing state
+    float SWINGSTARTANGLECOS = 0.8f;    // the cos(angle) of the swing against DOWN to enter the swing state
+    float MAXSWINGPERID = 1.0f;     // max swing duration. after the period the swing is forced to terminate
+
     Vector3 tipPos, handPos, wristPos, elbowPos;
     int status = 0;
 
@@ -15,11 +23,14 @@ public class HandDirection
 
     float movement;
     public bool isSwinging;
+    float swingingTimer;
 
     bool isRight;
 
-    public void Update(bool isDoubleHanded)
+    public void Update(bool isDoubleHanded, float elapsedTime)
     {
+        Vector3 lastStickPos = lastPos + lastDir.normalized;
+
         // Position
         if ((status | 0x02) != 0)
             position = handPos;
@@ -29,23 +40,8 @@ public class HandDirection
             position = wristPos;
         else
             position = lastPos;
-
         Vector3 move = position - lastPos;
-        movement = movement * 0.96f + move.magnitude;
-
-        float threshold;
-        bool wasSwinging = isSwinging;
-        if (move.magnitude > 0)
-        {
-            if (isSwinging)
-                isSwinging = (move.magnitude > 0.01f);
-            else
-                isSwinging = (move.magnitude > 0.07f && Vector3.Dot(move.normalized, Vector3.down) > 0.5f);
-
-            if (wasSwinging && !isSwinging)
-                Debug.Log("stop swing: " + move.magnitude + " : " + Vector3.Dot(move.normalized, Vector3.down));
-        }
-
+        movement = movement * MOVEMENTDECAY + move.magnitude;
         lastPos = position;
 
         // Direction
@@ -62,10 +58,43 @@ public class HandDirection
 //            tempDir = handPos - elbowPos;
         else
             tempDir = lastDir;
-
         lastDir = currentDir;
-        tempDir = tempDir * 0.15f + currentDir * 0.85f;
+        tempDir = tempDir * (1-DIRECTIONDECAY) + currentDir * DIRECTIONDECAY;
         currentDir = tempDir;
+
+        // Swing Check
+        Vector3 currentStickPos = position + currentDir.normalized;
+        Vector3 stickMove = currentStickPos - lastStickPos;
+
+        bool wasSwinging = isSwinging;
+        if (stickMove.magnitude > 0 && status > 0)
+        {
+            if (isSwinging) // if isSwinging, keep the state while stick is moving to any direction
+            {
+                isSwinging = (stickMove.magnitude > SWINGKEEPSPEED);
+            }
+            else  // to enter isSwinging, fast downward swing is required
+            {
+                isSwinging = (stickMove.magnitude > SWINGSTARTSPEED 
+                    && Vector3.Dot(stickMove.normalized, Vector3.down) > SWINGSTARTANGLECOS);
+            }
+        }
+        if (!wasSwinging && isSwinging)
+            swingingTimer = MAXSWINGPERID;
+
+        swingingTimer -= elapsedTime;
+        if (swingingTimer < 0)
+        {
+            isSwinging = false;
+            Debug.Log("Swing Expired");
+        }
+
+        // debug: Change the state of Swing
+        if (wasSwinging && !isSwinging)
+            Debug.Log("stop swing: " + isRight + stickMove.magnitude + " : " + Vector3.Dot(stickMove.normalized, Vector3.down));
+        else if (!wasSwinging && isSwinging)
+            Debug.Log("start swing: " + isRight + stickMove.magnitude + " : " + Vector3.Dot(stickMove.normalized, Vector3.down));
+
     }
 
 
@@ -91,7 +120,6 @@ public class HandDirection
     public void reset()
     {
         status = 0;
-        // isSwinging = false;
     }
 
     public Vector3 getPosition()
