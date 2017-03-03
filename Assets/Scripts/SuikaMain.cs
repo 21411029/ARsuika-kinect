@@ -7,12 +7,12 @@ public class SuikaMain : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-	
+
 	}
 
     void OnTriggerEnter(Collider col)
@@ -23,6 +23,7 @@ public class SuikaMain : MonoBehaviour {
             Debug.Log("Hit and Swing=" + body.isSwinging());
             if (body.isSwinging())
             {
+                WiimoteController.Instance.SetRumble(0.2f);
                 AudioSource stickAudio = col.GetComponent<AudioSource>();
                 stickAudio.clip = audioHit;
                 stickAudio.time = 0.12f;
